@@ -1,0 +1,130 @@
+================================================================================
+         NEXT STEPS TO COMPLETE YOUR RISC-V PIPELINE PROJECT
+================================================================================
+
+================================================================================
+PHASE 1 -- Run Simulation in Vivado (Do This First)
+================================================================================
+
+STEP 1: Open Vivado
+  - Launch Xilinx Vivado -> Click "Create Project"
+  - Name: riscv_pipeline
+  - Location: C:\Users\2479309\Desktop\MP
+  - Type: RTL Project
+  - Part: any Artix-7 (e.g., xc7a35tcpg236-1) -> Finish
+
+STEP 2: Add Design Sources
+  - Sources panel -> "+" -> "Add or create design sources" -> "Add Files"
+  - Navigate to C:\Users\2479309\Desktop\MP\src\
+  - Select ALL 15 .v files -> Finish
+  - Right-click riscv_top -> "Set as Top"
+
+STEP 3: Add Testbench
+  - Sources panel -> "+" -> "Add or create simulation sources" -> "Add Files"
+  - Navigate to C:\Users\2479309\Desktop\MP\tb\
+  - Select tb_riscv.v -> Finish
+  - Right-click tb_riscv (under Simulation Sources) -> "Set as Top"
+
+STEP 4: Check for Errors
+  - Flow Navigator -> "Open Elaborated Design"
+  - Wait for elaboration to finish -- fix any errors shown in Tcl Console
+  - If it passes -> you will see the Schematic (take a screenshot)
+
+STEP 5: Run Simulation
+  - Flow Navigator -> "Run Simulation" -> "Run Behavioral Simulation"
+  - In Tcl Console type:  run 600ns  and press Enter
+  - Watch the console -- you should see all PASS lines printed
+
+STEP 6: Set Up Waveform View
+  Add these signals to the waveform window:
+    clk, rst
+    pc_if        <- current PC (should increment by 4 each cycle)
+    stall        <- goes HIGH for 1 cycle after LW instruction
+    flush_pipe   <- goes HIGH when branch/jump taken
+    forward_a    <- shows 10 (EX->EX) or 01 (MEM->EX) during forwarding
+    branch_taken <- goes HIGH at the BEQ instruction
+
+  Also add: DUT -> RF -> regs  (register file contents)
+
+STEP 7: Take Screenshots
+  You need these for your report:
+    1. Full waveform (all 60 cycles)
+    2. Zoomed view: stall = 1  (after LW instruction)
+    3. Zoomed view: forward_a/b not equal to 00  (during ADD after ADDI)
+    4. Zoomed view: branch_taken = 1  (at BEQ instruction)
+    5. Tcl Console showing all PASS results
+    6. Elaboration Schematic diagram
+
+================================================================================
+PHASE 2 -- Complete Your Project Report
+================================================================================
+
+Add these sections to your report using the simulation results:
+
+  SECTION              | WHAT TO WRITE
+  ---------------------|------------------------------------------------------
+  Block Diagram        | 5-stage pipeline diagram (IF->ID->EX->MEM->WB
+                       | with hazard/forwarding units)
+  Simulation Results   | Paste waveform screenshots with explanations
+  Forwarding Analysis  | Show cycle-by-cycle how forward_a=10 eliminates stall
+  Hazard Detection     | Show the 1-cycle stall waveform for LW instruction
+  Branch Flush         | Show flush_pipe=1 and x10 staying 0
+  Performance          | CPI ~ 1.1 (most instructions complete in 1 cycle;
+                       | only load-use adds 1 extra cycle)
+
+================================================================================
+PHASE 3 -- Patent Filing (After Report is Done)
+================================================================================
+
+STEP 1: Get NOC from REVA University
+  - Email your HOD/IP cell: request "No Objection Certificate" for
+    individual patent filing
+  - OR ask if university wants to file jointly (reduces your cost)
+
+STEP 2: Register on IPO Portal
+  - Go to: https://ipindiaonline.gov.in/epatentfiling
+  - Register as individual applicant -> verify email
+
+STEP 3: Prepare Form 2 (Provisional Specification)
+  Write a PDF document containing:
+  - Title of invention
+  - Field, Background, Summary (copy from PATENT_GUIDE.md)
+  - 4 broad claims
+  - Figures (your block diagram + waveform screenshots)
+
+STEP 4: File Online
+  - Login -> Patent Application -> Provisional Application
+  - Upload Form 1 (filled) + Form 2 PDF
+  - Pay: Rs. 1,600 (individual) OR Rs. 4,000 (educational institution)
+  - Download your Application Number -- this is your patent priority date
+
+STEP 5: Complete Specification (within 12 months)
+  - File full claims + request examination before your priority date expires
+
+================================================================================
+QUICK CHECKLIST
+================================================================================
+
+  [ ] Vivado project created
+  [ ] All 15 src/*.v files added
+  [ ] tb_riscv.v added as simulation source
+  [ ] Elaboration passes with no errors
+  [ ] Simulation runs and shows all PASS
+  [ ] 6 waveform screenshots taken
+  [ ] Schematic screenshot taken
+  [ ] Report updated with results
+  [ ] NOC obtained from REVA University
+  [ ] IPO portal registration done
+  [ ] Form 2 PDF prepared
+  [ ] Provisional patent filed (Rs. 1,600 - Rs. 4,000)
+
+================================================================================
+REFERENCE FILES (already saved on your PC)
+================================================================================
+
+  Vivado detailed steps : C:\Users\2479309\Desktop\MP\VIVADO_STEPS.md
+  Patent filing details : C:\Users\2479309\Desktop\MP\PATENT_GUIDE.md
+  All Verilog sources   : C:\Users\2479309\Desktop\MP\src\
+  Testbench             : C:\Users\2479309\Desktop\MP\tb\tb_riscv.v
+
+================================================================================
