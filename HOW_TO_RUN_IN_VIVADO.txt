@@ -1,0 +1,253 @@
+================================================================================
+       HOW TO RUN THE RISC-V PIPELINE PROJECT IN VIVADO
+              (Guide for Team Members)
+================================================================================
+
+WHAT YOU NEED BEFORE STARTING:
+  - Xilinx Vivado installed (any version 2019.1 or later)
+  - The project folder: MP\  (copy this entire folder to your PC)
+  - The folder must contain:
+      MP\src\         <- 15 Verilog design files
+      MP\tb\          <- 1 testbench file (tb_riscv.v)
+
+================================================================================
+STEP 1 -- OPEN VIVADO AND CREATE A NEW PROJECT
+================================================================================
+
+  1. Open Vivado
+  2. On the home screen, click "Create Project"
+  3. Click Next
+  4. Enter:
+       Project name     : riscv_pipeline
+       Project location : (choose where MP folder is on your PC)
+  5. Click Next
+  6. Select "RTL Project"
+     CHECK the box: "Do not specify sources at this time"
+  7. Click Next
+  8. On the "Default Part" screen:
+       - Click the "Parts" tab
+       - Search: xc7a35t
+       - Select: xc7a35tcpg236-1
+  9. Click Next -> Finish
+
+  [Vivado will open with a blank project]
+
+================================================================================
+STEP 2 -- ADD THE VERILOG DESIGN FILES
+================================================================================
+
+  1. In the left "Sources" panel, click the "+" (plus) button
+  2. Select "Add or create design sources" -> click Next
+  3. Click "Add Files"
+  4. Navigate to the  src\  folder inside your MP folder
+  5. Select ALL 15 files at once:
+       - alu.v
+       - alu_ctrl.v
+       - control_unit.v
+       - data_mem.v
+       - ex_mem_reg.v
+       - forward_unit.v
+       - hazard_unit.v
+       - id_ex_reg.v
+       - if_id_reg.v
+       - imm_gen.v
+       - instr_mem.v
+       - mem_wb_reg.v
+       - pc_reg.v
+       - regfile.v
+       - riscv_top.v
+  6. Click OK -> Finish
+
+  7. In the Sources panel, you will now see all files listed
+  8. Right-click "riscv_top" -> click "Set as Top"
+     (riscv_top should now show a small triangle/arrow icon)
+
+================================================================================
+STEP 3 -- ADD THE TESTBENCH FILE
+================================================================================
+
+  1. In the Sources panel, click the "+" button again
+  2. Select "Add or create simulation sources" -> click Next
+  3. Click "Add Files"
+  4. Navigate to the  tb\  folder inside your MP folder
+  5. Select: tb_riscv.v
+  6. Click OK -> Finish
+
+  7. In the Sources panel, expand "Simulation Sources"
+  8. Right-click "tb_riscv" -> click "Set as Top"
+
+================================================================================
+STEP 4 -- CHECK FOR ERRORS (ELABORATION)
+================================================================================
+
+  1. In the left "Flow Navigator" panel
+  2. Under "RTL ANALYSIS", click "Open Elaborated Design"
+  3. Vivado will process all files (takes 30-60 seconds)
+
+  IF YOU SEE ERRORS:
+    - Look at the "Tcl Console" at the bottom of the screen
+    - Errors will show in RED
+    - Common fix: make sure all 15 files are added correctly in Step 2
+
+  IF NO ERRORS:
+    - A schematic diagram will open (this is the circuit diagram)
+    - Take a screenshot of this -- you need it for the report
+
+================================================================================
+STEP 5 -- RUN THE SIMULATION
+================================================================================
+
+  1. In the left "Flow Navigator" panel
+  2. Under "SIMULATION", click "Run Simulation"
+  3. Click "Run Behavioral Simulation"
+  4. Vivado opens the Simulation window (takes about 1 minute)
+
+  5. At the bottom, find the "Tcl Console" tab
+  6. Click on it and type:    run 600ns
+     Then press ENTER
+
+  7. The simulation will run and print results in the console
+
+================================================================================
+STEP 6 -- CHECK THE RESULTS IN TCL CONSOLE
+================================================================================
+
+  After running, scroll up in the Tcl Console.
+  You should see output like this:
+
+  -------------------------------------------------------
+  === RESET RELEASED -- Simulation START ===
+
+  Cycle 1 | PC_IF=0x00000000 | ...
+  Cycle 2 | PC_IF=0x00000004 | ...
+  ...
+
+  ========== REGISTER FILE CHECK ==========
+  x1  = 10   (expected 10)   PASS
+  x2  = 20   (expected 20)   PASS
+  x3  = 30   (expected 30)   PASS
+  x4  = -10  (expected -10)  PASS
+  x5  = 0    (expected 0)    PASS
+  x6  = 30   (expected 30)   PASS
+  x7  = 30   (expected 30)   PASS
+  x8  = 30   (expected 30)   PASS
+  x9  = 60   (expected 60)   PASS
+  x10 = 0    (expected 0)    PASS
+  x11 = 77   (expected 77)   PASS
+
+  ========== DATA MEMORY CHECK ============
+  dmem[0] = 30  (expected 30)  PASS
+
+  ========== FORWARDING UNIT CHECK ========
+  EX->EX forward test (x3=x1+x2):  PASS
+  MEM->EX forward test (x9=x8+x3): PASS
+
+  ========== BRANCH FLUSH CHECK ===========
+  x10 should be 0 (addi x10,x0,99 was skipped): PASS
+
+  === Simulation COMPLETE ===
+  -------------------------------------------------------
+
+  If you see all PASS -> simulation is successful!
+  Take a screenshot of this console output for the report.
+
+================================================================================
+STEP 7 -- VIEW THE WAVEFORM
+================================================================================
+
+  The waveform window opens automatically after simulation.
+  To add signals:
+
+  1. In the "Scope" panel (left side of simulation window)
+     Click on "tb_riscv" -> then click "DUT"
+
+  2. In the "Objects" panel (right side)
+     You will see all signals listed
+
+  3. Add these important signals to waveform:
+     (Right-click each signal -> "Add to Wave Window")
+
+       clk          <- clock signal
+       rst          <- reset signal
+       pc_if        <- Program Counter value
+       stall        <- load-use hazard stall
+       flush_pipe   <- branch/jump flush
+       branch_taken <- 1 when branch is taken
+       forward_a    <- forwarding select for rs1
+       forward_b    <- forwarding select for rs2
+
+  4. After adding signals, click the RESTART button (circular arrow icon)
+     Then click RUN ALL (play button) or press F3
+
+  5. The waveform will display all signal values over time
+
+  6. Use the scroll wheel to zoom in/out on the waveform
+     Look for:
+       - stall going HIGH for 1 cycle (after LW instruction)
+       - flush_pipe going HIGH (at BEQ instruction)
+       - forward_a/b showing 10 or 01 (during forwarding)
+
+================================================================================
+STEP 8 -- SAVE YOUR WORK
+================================================================================
+
+  Save the waveform:
+    Waveform window -> File -> Save Waveform Configuration
+    Save as: riscv_sim.wcfg
+
+  Save the project:
+    File -> Save Project
+
+================================================================================
+SCREENSHOTS TO TAKE FOR THE REPORT
+================================================================================
+
+  1. Schematic diagram (from Step 4 -- Elaboration)
+  2. Full waveform showing all 60 cycles
+  3. Zoomed waveform: stall = 1  (after LW instruction, around cycle 10-12)
+  4. Zoomed waveform: branch_taken = 1  (around cycle 13-15)
+  5. Zoomed waveform: forward_a showing value 10  (around cycle 4-5)
+  6. Tcl Console with all PASS results (from Step 6)
+
+================================================================================
+IF SOMETHING GOES WRONG
+================================================================================
+
+  PROBLEM: "Module not found" error during elaboration
+  FIX    : Go back to Step 2, make sure all 15 .v files are added
+
+  PROBLEM: Simulation shows FAIL for some registers
+  FIX    : Contact the project lead to recheck the source files
+
+  PROBLEM: Waveform shows all red or X values
+  FIX    : Make sure rst=1 for at least 2 cycles at the start
+            Check that tb_riscv is set as simulation top module
+
+  PROBLEM: Tcl Console shows "run: Time has expired"
+  FIX    : Type "run 600ns" again in the Tcl Console
+
+  PROBLEM: Simulation window does not open
+  FIX    : Close Vivado, reopen the project, repeat from Step 5
+
+================================================================================
+PROJECT FILES SUMMARY
+================================================================================
+
+  src\riscv_top.v     <- TOP MODULE (main processor - connects everything)
+  src\pc_reg.v        <- Program Counter
+  src\instr_mem.v     <- Instruction Memory (stores the test program)
+  src\if_id_reg.v     <- Pipeline Register between Stage 1 and Stage 2
+  src\control_unit.v  <- Decoder (generates control signals)
+  src\regfile.v       <- 32 General Purpose Registers
+  src\imm_gen.v       <- Immediate Value Generator
+  src\hazard_unit.v   <- Detects load-use hazards
+  src\id_ex_reg.v     <- Pipeline Register between Stage 2 and Stage 3
+  src\alu_ctrl.v      <- ALU Operation Selector
+  src\alu.v           <- Arithmetic Logic Unit (does the math)
+  src\forward_unit.v  <- Data Forwarding (avoids unnecessary stalls)
+  src\ex_mem_reg.v    <- Pipeline Register between Stage 3 and Stage 4
+  src\data_mem.v      <- Data Memory (read/write data)
+  src\mem_wb_reg.v    <- Pipeline Register between Stage 4 and Stage 5
+  tb\tb_riscv.v       <- Testbench (runs the simulation and checks results)
+
+================================================================================
